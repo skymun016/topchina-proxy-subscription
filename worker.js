@@ -72,17 +72,13 @@ function parseProxies(content) {
     
     // 生成节点名称
     const nodeName = generateNodeName(cleanCountry, cleanIp);
-    const ipSuffix = cleanIp.split('.').pop();
 
-    // 对于 Surge，如果用户名包含特殊字符，我们使用简化的用户名
-    // 因为原始用户名可能是 base64 编码或包含特殊字符
-    const simpleUsername = `user${ipSuffix}`;
-
+    // 使用真实的用户名，不要替换！
     const proxy = {
       name: nodeName,
       server: cleanIp,
       port: parseInt(cleanPort),
-      username: simpleUsername,
+      username: cleanUsername,
       password: '1',
       country: cleanCountry
     };
@@ -290,16 +286,41 @@ function generateIndexHTML(origin) {
 }
 
 /**
+ * 生成本地 Surge 配置文件
+ */
+async function generateLocalSurgeConfig() {
+  try {
+    // 获取并解析代理列表
+    const content = await fetchProxyList();
+    const proxies = parseProxies(content);
+
+    // 过滤代理（取前50个）
+    const filteredProxies = filterProxies(proxies, 50, null);
+
+    // 生成配置
+    const config = generateSurgeSubscription(filteredProxies);
+
+    console.log('生成的 Surge 配置：');
+    console.log(config);
+
+    return config;
+  } catch (error) {
+    console.error('生成配置失败:', error);
+    throw error;
+  }
+}
+
+/**
  * 主处理函数
  */
 async function handleRequest(request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  
+
   // 解析查询参数
   const maxNodes = parseInt(url.searchParams.get('max')) || CONFIG.MAX_NODES_DEFAULT;
   const countryFilter = url.searchParams.get('country');
-  
+
   try {
     // 路由处理
     if (pathname === '/') {
@@ -308,45 +329,35 @@ async function handleRequest(request) {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
     }
-    
-    if (pathname === '/surge' || pathname === '/clash') {
-      // 尝试从缓存获取
-      const cacheKey = `topchina-proxies-${Math.floor(Date.now() / (CONFIG.CACHE_DURATION * 1000))}`;
-      let proxies = await TOPCHINA_CACHE.get(cacheKey, 'json');
-      
-      if (!proxies) {
-        // 获取并解析代理列表
-        const content = await fetchProxyList();
-        proxies = parseProxies(content);
-        
-        // 存储到缓存
-        await TOPCHINA_CACHE.put(cacheKey, JSON.stringify(proxies), {
-          expirationTtl: CONFIG.CACHE_DURATION
-        });
-      }
-      
+
+    if (pathname === '/surge' || pathname === '/surge.conf' || pathname === '/clash') {
+      // 获取并解析代理列表
+      const content = await fetchProxyList();
+      const proxies = parseProxies(content);
+
       // 过滤代理
       const filteredProxies = filterProxies(proxies, maxNodes, countryFilter);
-      
+
       if (pathname === '/surge') {
         const config = generateSurgeSubscription(filteredProxies);
         return new Response(config, {
-          headers: { 
+          headers: {
             'Content-Type': 'text/plain; charset=utf-8',
-            'Cache-Control': 'public, max-age=3600'
+            'Content-Disposition': 'attachment; filename="surge.conf"',
+            'Cache-Control': 'no-cache'
           }
         });
       } else {
         const config = generateClashSubscription(filteredProxies);
         return new Response(config, {
-          headers: { 
+          headers: {
             'Content-Type': 'application/json; charset=utf-8',
-            'Cache-Control': 'public, max-age=3600'
+            'Cache-Control': 'no-cache'
           }
         });
       }
     }
-    
+
     if (pathname === '/status') {
       const status = {
         timestamp: new Date().toISOString(),
@@ -354,25 +365,38 @@ async function handleRequest(request) {
         max_nodes_limit: CONFIG.MAX_NODES_LIMIT,
         source: CONFIG.SOURCE_URL
       };
-      
+
       return new Response(JSON.stringify(status, null, 2), {
         headers: { 'Content-Type': 'application/json; charset=utf-8' }
       });
     }
-    
+
     // 404
     return new Response('Not Found', { status: 404 });
-    
+
   } catch (error) {
     console.error('处理请求失败:', error);
-    return new Response(`Error: ${error.message}`, { 
+    return new Response(`Error: ${error.message}`, {
       status: 500,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
   }
 }
 
-// Cloudflare Workers 事件监听器
-addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request));
-});
+// 如果在 Node.js 环境中运行，直接生成配置文件
+if (typeof module !== 'undefined' && module.exports) {
+  // Node.js 环境
+  const fs = require('fs');
+
+  generateLocalSurgeConfig().then(config => {
+    fs.writeFileSync('surge.conf', config, 'utf8');
+    console.log('✅ surge.conf 文件已生成！');
+  }).catch(error => {
+    console.error('❌ 生成失败:', error);
+  });
+} else {
+  // Cloudflare Workers 环境
+  addEventListener('fetch', event => {
+    event.respondWith(handleRequest(event.request));
+  });
+}
