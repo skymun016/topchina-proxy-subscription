@@ -72,17 +72,17 @@ function parseProxies(content) {
     
     // 生成节点名称
     const nodeName = generateNodeName(cleanCountry, cleanIp);
-    
-    // 清理用户名，移除特殊字符
-    const cleanedUsername = cleanUsername
-      .replace(/[=+\/\-_]/g, '') // 移除特殊字符
-      .substring(0, 16); // 限制长度
+    const ipSuffix = cleanIp.split('.').pop();
+
+    // 对于 Surge，如果用户名包含特殊字符，我们使用简化的用户名
+    // 因为原始用户名可能是 base64 编码或包含特殊字符
+    const simpleUsername = `user${ipSuffix}`;
 
     const proxy = {
       name: nodeName,
       server: cleanIp,
       port: parseInt(cleanPort),
-      username: cleanedUsername || 'user', // 如果清理后为空，使用默认值
+      username: simpleUsername,
       password: '1',
       country: cleanCountry
     };
