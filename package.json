@@ -1,0 +1,34 @@
+{
+  "name": "topchina-proxy-subscription",
+  "version": "1.0.0",
+  "description": "TopChina Proxy List to Surge/Clash Subscription Service for Cloudflare Workers",
+  "main": "worker.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "preview": "wrangler preview",
+    "tail": "wrangler tail",
+    "setup": "./deploy.sh"
+  },
+  "keywords": [
+    "proxy",
+    "surge",
+    "clash",
+    "subscription",
+    "cloudflare-workers",
+    "topchina"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/topchina-proxy-subscription.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/topchina-proxy-subscription/issues"
+  },
+  "homepage": "https://github.com/yourusername/topchina-proxy-subscription#readme"
+}

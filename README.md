@@ -26,19 +26,18 @@ https://skymun016.github.io/hysteria2-subscription/subscription.txt
 
 ### Surge 配置
 ```
-233boy-hysteria2-47.239.210.12 = hysteria2, 47.239.210.12, 55635, password=54b95fcd-77fc-4521-8c9a-718fd1b15c06, alpn=h3, skip-cert-verify=true
+HY1-SSL = hysteria2, hy1.manusame.cn, 9443, password=54b95fcd-77fc-4521-8c9a-718fd1b15c06, alpn=h3
 ```
 
 ### Clash 配置
 ```yaml
-- name: "233boy-hysteria2-47.239.210.12"
+- name: "HY1-SSL"
   type: hysteria2
-  server: 47.239.210.12
-  port: 55635
+  server: hy1.manusame.cn
+  port: 9443
   password: 54b95fcd-77fc-4521-8c9a-718fd1b15c06
   alpn:
     - h3
-  skip-cert-verify: true
 ```
 
 ## ⚠️ 注意事项
@@ -50,10 +49,11 @@ https://skymun016.github.io/hysteria2-subscription/subscription.txt
 
 ## 📊 节点状态
 
-- **服务器**: 47.239.210.12:55635
-- **协议**: Hysteria2
+- **服务器**: hy1.manusame.cn:9443
+- **协议**: Hysteria2 (SSL)
 - **状态**: 🟢 在线
+- **SSL**: ✅ Let's Encrypt 证书
 
 ---
 
-*最后更新: 2025-01-02*
+*最后更新: 2025-07-02*

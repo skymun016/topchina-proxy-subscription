@@ -1,0 +1,84 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "inbounds": [
+    {
+      "type": "hysteria2",
+      "tag": "hy2-in",
+      "listen": "::",
+      "listen_port": 443,
+      "users": [
+        {
+          "password": "54b95fcd-77fc-4521-8c9a-718fd1b15c06"
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "server_name": "hy.example.com",
+        "certificate_path": "/etc/ssl/cloudflare/cert.pem",
+        "key_path": "/etc/ssl/cloudflare/key.pem",
+        "alpn": [
+          "h3"
+        ]
+      },
+      "masquerade": "https://www.bing.com",
+      "up_mbps": 100,
+      "down_mbps": 100
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "protocol": "dns",
+        "outbound": "dns-out"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geoip-cn",
+        "outbound": "direct"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs"
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs"
+      }
+    ],
+    "final": "direct"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "cache_id": "my_profile2",
+      "store_fakeip": false
+    }
+  }
+}

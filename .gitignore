@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Wrangler
+.wrangler/
+wrangler.toml.bak
+*.bak
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+
+# KV temp files
+kv_*.txt
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache
+.cache/
+dist/
+
+# Temporary files
+tmp/
+temp/
