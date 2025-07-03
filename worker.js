@@ -164,7 +164,7 @@ function generateClashSubscription(proxies) {
 /**
  * 生成首页 HTML
  */
-function generateIndexHTML() {
+function generateIndexHTML(origin) {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -190,10 +190,10 @@ function generateIndexHTML() {
     <div class="section">
         <h2>📱 订阅链接</h2>
         <h3>Surge 订阅</h3>
-        <div class="url">${location.origin}/surge</div>
-        
+        <div class="url">${origin}/surge</div>
+
         <h3>Clash 订阅</h3>
-        <div class="url">${location.origin}/clash</div>
+        <div class="url">${origin}/clash</div>
     </div>
 
     <div class="section">
@@ -205,9 +205,9 @@ function generateIndexHTML() {
         
         <div class="example">
             <h4>使用示例：</h4>
-            <div class="url">${location.origin}/surge?max=50</div>
-            <div class="url">${location.origin}/surge?country=德国</div>
-            <div class="url">${location.origin}/clash?max=30&country=美国</div>
+            <div class="url">${origin}/surge?max=50</div>
+            <div class="url">${origin}/surge?country=德国</div>
+            <div class="url">${origin}/clash?max=30&country=美国</div>
         </div>
     </div>
 
@@ -256,7 +256,8 @@ async function handleRequest(request) {
   try {
     // 路由处理
     if (pathname === '/') {
-      return new Response(generateIndexHTML(), {
+      const origin = `${url.protocol}//${url.host}`;
+      return new Response(generateIndexHTML(origin), {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
     }
