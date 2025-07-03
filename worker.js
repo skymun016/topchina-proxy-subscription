@@ -133,21 +133,50 @@ function generateSurgeSubscription(proxies) {
     `# Nodes: ${proxies.length}`,
     '# Source: https://github.com/TopChina/proxy-list',
     '',
+    '[General]',
+    'loglevel = notify',
+    'internet-test-url = http://www.gstatic.com/generate_204',
+    'proxy-test-url = http://www.gstatic.com/generate_204',
+    'test-timeout = 5',
+    'ipv6 = false',
+    'dns-server = 223.5.5.5, 114.114.114.114, 8.8.8.8, 1.1.1.1',
+    'skip-proxy = localhost, *.local, 127.0.0.0/8, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12',
+    'bypass-system = true',
+    '',
     '[Proxy]'
   ];
 
   // 添加代理节点
   for (const proxy of proxies) {
-    // Surge HTTP 代理格式: name = http, server, port, username, password
     const line = `${proxy.name} = http, ${proxy.server}, ${proxy.port}, ${proxy.username}, ${proxy.password}`;
     lines.push(line);
   }
 
+  // 添加直连
+  lines.push('DIRECT = direct');
+
   // 添加代理组
   lines.push('');
   lines.push('[Proxy Group]');
-  const proxyNames = proxies.slice(0, 10).map(p => p.name).join(', ');
-  lines.push(`TopChina = select, ${proxyNames}`);
+  const proxyNames = proxies.slice(0, 10).map(p => p.name);
+  lines.push(`TopChina = select, ${proxyNames.join(', ')}, DIRECT`);
+  lines.push(`Auto = url-test, ${proxyNames.join(', ')}, url=http://www.gstatic.com/generate_204, interval=300`);
+
+  // 添加规则
+  lines.push('');
+  lines.push('[Rule]');
+  lines.push('# International websites');
+  lines.push('DOMAIN-SUFFIX,google.com,TopChina');
+  lines.push('DOMAIN-SUFFIX,youtube.com,TopChina');
+  lines.push('DOMAIN-SUFFIX,github.com,TopChina');
+  lines.push('DOMAIN-SUFFIX,twitter.com,TopChina');
+  lines.push('DOMAIN-SUFFIX,facebook.com,TopChina');
+  lines.push('# Chinese websites direct');
+  lines.push('DOMAIN-SUFFIX,baidu.com,DIRECT');
+  lines.push('DOMAIN-SUFFIX,qq.com,DIRECT');
+  lines.push('DOMAIN-SUFFIX,taobao.com,DIRECT');
+  lines.push('GEOIP,CN,DIRECT');
+  lines.push('FINAL,TopChina');
 
   return lines.join('\n');
 }
