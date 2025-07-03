@@ -122,15 +122,22 @@ function generateSurgeSubscription(proxies) {
     `# Update: ${new Date().toISOString()}`,
     `# Nodes: ${proxies.length}`,
     '# Source: https://github.com/TopChina/proxy-list',
-    ''
+    '',
+    '[Proxy]'
   ];
-  
+
   // 添加代理节点
   for (const proxy of proxies) {
     const line = `${proxy.name} = http, ${proxy.server}, ${proxy.port}, ${proxy.username}, ${proxy.password}`;
     lines.push(line);
   }
-  
+
+  // 添加代理组
+  lines.push('');
+  lines.push('[Proxy Group]');
+  const proxyNames = proxies.slice(0, 10).map(p => p.name).join(', ');
+  lines.push(`TopChina = select, ${proxyNames}`);
+
   return lines.join('\n');
 }
 
