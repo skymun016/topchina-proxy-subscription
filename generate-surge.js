@@ -73,12 +73,14 @@ function parseProxies(content) {
     // 生成节点名称
     const nodeName = generateNodeName(cleanCountry, cleanIp);
 
-    // 使用真实的用户名
+    // 对用户名进行 URL 编码以处理特殊字符
+    const encodedUsername = encodeURIComponent(cleanUsername);
+
     const proxy = {
       name: nodeName,
       server: cleanIp,
       port: parseInt(cleanPort),
-      username: cleanUsername,
+      username: encodedUsername,
       password: '1',
       country: cleanCountry
     };
