@@ -73,11 +73,16 @@ function parseProxies(content) {
     // 生成节点名称
     const nodeName = generateNodeName(cleanCountry, cleanIp);
     
+    // 清理用户名，移除特殊字符
+    const cleanedUsername = cleanUsername
+      .replace(/[=+\/\-_]/g, '') // 移除特殊字符
+      .substring(0, 16); // 限制长度
+
     const proxy = {
       name: nodeName,
       server: cleanIp,
       port: parseInt(cleanPort),
-      username: cleanUsername.length > 20 ? cleanUsername.substring(0, 20) : cleanUsername,
+      username: cleanedUsername || 'user', // 如果清理后为空，使用默认值
       password: '1',
       country: cleanCountry
     };
