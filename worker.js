@@ -60,8 +60,13 @@ function parseProxies(content) {
     const cleanCountry = country.trim();
     const cleanUsername = username.trim();
     
-    // 跳过表头
-    if (cleanIp === 'IP地址' || !cleanIp || !cleanPort.match(/^\d+$/)) {
+    // 跳过表头和无效数据
+    if (cleanIp === 'IP地址' || !cleanIp || !cleanPort.match(/^\d+$/) || !cleanUsername) {
+      continue;
+    }
+
+    // 验证 IP 地址格式
+    if (!cleanIp.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
       continue;
     }
     
@@ -72,7 +77,7 @@ function parseProxies(content) {
       name: nodeName,
       server: cleanIp,
       port: parseInt(cleanPort),
-      username: cleanUsername,
+      username: cleanUsername.length > 20 ? cleanUsername.substring(0, 20) : cleanUsername,
       password: '1',
       country: cleanCountry
     };
@@ -128,6 +133,7 @@ function generateSurgeSubscription(proxies) {
 
   // 添加代理节点
   for (const proxy of proxies) {
+    // Surge HTTP 代理格式: name = http, server, port, username, password
     const line = `${proxy.name} = http, ${proxy.server}, ${proxy.port}, ${proxy.username}, ${proxy.password}`;
     lines.push(line);
   }
